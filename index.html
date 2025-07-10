@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Candidate Evaluation</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      padding: 20px;
+      max-width: 600px;
+      margin: 40px auto;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      text-align: center;
+    }
+    .criteria {
+      margin-bottom: 20px;
+    }
+    label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 6px;
+    }
+    input[type="range"] {
+      width: 80%;
+    }
+    .slider-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .value {
+      width: 30px;
+      text-align: right;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      border: none;
+      background-color: #2d89ef;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #1b5fbd;
+    }
+  </style>
+</head>
+<body>
+  <h1>Candidate Evaluation</h1>
+  <form id="evaluationForm">
+    <div class="criteria">
+      <label for="name">Interviewee Name:</label>
+      <input type="text" id="name" name="name" required />
+    </div>
+
+    <div class="criteria">
+      <label for="problemSolving">Problem Solving:</label>
+      <div class="slider-container">
+        <input type="range" id="problemSolving" name="problemSolving" min="0" max="10" value="5" oninput="updateValue('problemSolving')"/>
+        <span class="value" id="val-problemSolving">5</span>
+      </div>
+    </div>
+
+    <div class="criteria">
+      <label for="communication">Communication:</label>
+      <div class="slider-container">
+        <input type="range" id="communication" name="communication" min="0" max="10" value="5" oninput="updateValue('communication')"/>
+        <span class="value" id="val-communication">5</span>
+      </div>
+    </div>
+
+    <div class="criteria">
+      <label for="adaptability">Adaptability:</label>
+      <div class="slider-container">
+        <input type="range" id="adaptability" name="adaptability" min="0" max="10" value="5" oninput="updateValue('adaptability')"/>
+        <span class="value" id="val-adaptability">5</span>
+      </div>
+    </div>
+
+    <div class="criteria">
+      <label for="resourcefulness">Resourcefulness:</label>
+      <div class="slider-container">
+        <input type="range" id="resourcefulness" name="resourcefulness" min="0" max="10" value="5" oninput="updateValue('resourcefulness')"/>
+        <span class="value" id="val-resourcefulness">5</span>
+      </div>
+    </div>
+
+    <div class="criteria">
+      <label for="timeManagement">Time Management:</label>
+      <div class="slider-container">
+        <input type="range" id="timeManagement" name="timeManagement" min="0" max="10" value="5" oninput="updateValue('timeManagement')"/>
+        <span class="value" id="val-timeManagement">5</span>
+      </div>
+    </div>
+
+    <button type="submit">Submit Evaluation</button>
+  </form>
+
+  <script>
+    function updateValue(id) {
+      document.getElementById('val-' + id).textContent = document.getElementById(id).value;
+    }
+
+    const AIRTABLE_API_KEY = "patjLGBmbufWET3t0.4765279d68c85779d47b997537212a2d67e8e6f02bd880bb13c6cbc954ba7b2b"; // Replace with your personal access token
+    const BASE_ID = "appMGO1OGHPmnogoi";
+    const TABLE_NAME = "Evaluations"; // Replace with your actual table name
+
+    document.getElementById('evaluationForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const data = {
+        fields: {
+          Name: document.getElementById('name').value,
+          "Problem Solving": parseInt(document.getElementById('problemSolving').value),
+          Communication: parseInt(document.getElementById('communication').value),
+          Adaptability: parseInt(document.getElementById('adaptability').value),
+          Resourcefulness: parseInt(document.getElementById('resourcefulness').value),
+          "Time Management": parseInt(document.getElementById('timeManagement').value)
+        }
+      };
+
+      fetch(`https://api.airtable.com/v0/${BASE_ID}/${encodeURIComponent(TABLE_NAME)}`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${AIRTABLE_API_KEY}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+      })
+      .then(response => {
+        if (!response.ok) throw new Error("Submission failed");
+        alert("Evaluation submitted successfully!");
+        document.getElementById("evaluationForm").reset();
+        // Reset visible values too
+        ['problemSolving', 'communication', 'adaptability', 'resourcefulness', 'timeManagement']
+          .forEach(id => document.getElementById('val-' + id).textContent = 5);
+      })
+      .catch(error => {
+        console.error("Error submitting to Airtable:", error);
+        alert("Failed to submit evaluation.");
+      });
+    });
+  </script>
+</body>
+</html>
